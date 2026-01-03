@@ -1,17 +1,21 @@
 import { motion } from 'framer-motion';
-import { Subject } from '@/types/attendance';
-import { AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Edit2, Trash2 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { SubjectWithStats } from '@/hooks/useSubjects';
 
 interface SubjectCardProps {
-  subject: Subject;
+  subject: SubjectWithStats;
   index: number;
   onMarkAttendance: (subjectId: string, status: 'present' | 'absent') => void;
+  onEdit: (subject: SubjectWithStats) => void;
+  onDelete: (id: string) => void;
 }
 
-const SubjectCard = ({ subject, index, onMarkAttendance }: SubjectCardProps) => {
-  const percentage = Math.round((subject.attendedClasses / subject.totalClasses) * 100);
-  const isAtRisk = percentage < 75;
+const SubjectCard = ({ subject, index, onMarkAttendance, onEdit, onDelete }: SubjectCardProps) => {
+  const percentage = subject.totalClasses > 0 
+    ? Math.round((subject.attendedClasses / subject.totalClasses) * 100) 
+    : 0;
+  const isAtRisk = percentage < 75 && subject.totalClasses > 0;
   
   return (
     <motion.div
@@ -23,14 +27,26 @@ const SubjectCard = ({ subject, index, onMarkAttendance }: SubjectCardProps) => 
         isAtRisk ? 'border-destructive/30' : 'border-border'
       }`}
     >
-      {isAtRisk && (
-        <div className="absolute right-3 top-3">
-          <div className="flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-1 text-xs font-medium text-destructive">
+      <div className="absolute right-3 top-3 flex gap-1">
+        {isAtRisk && (
+          <div className="flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-1 text-xs font-medium text-destructive mr-1">
             <AlertTriangle className="h-3 w-3" />
             Low
           </div>
-        </div>
-      )}
+        )}
+        <button
+          onClick={() => onEdit(subject)}
+          className="rounded-lg p-1.5 hover:bg-muted transition-colors"
+        >
+          <Edit2 className="h-4 w-4 text-muted-foreground" />
+        </button>
+        <button
+          onClick={() => onDelete(subject.id)}
+          className="rounded-lg p-1.5 hover:bg-destructive/10 transition-colors"
+        >
+          <Trash2 className="h-4 w-4 text-destructive" />
+        </button>
+      </div>
       
       <div 
         className="mb-4 h-1 w-12 rounded-full" 
@@ -42,7 +58,9 @@ const SubjectCard = ({ subject, index, onMarkAttendance }: SubjectCardProps) => 
       
       <div className="mt-4">
         <div className="flex items-end justify-between mb-2">
-          <span className="text-2xl font-bold text-foreground">{percentage}%</span>
+          <span className="text-2xl font-bold text-foreground">
+            {subject.totalClasses > 0 ? `${percentage}%` : 'N/A'}
+          </span>
           <span className="text-sm text-muted-foreground">
             {subject.attendedClasses}/{subject.totalClasses} classes
           </span>

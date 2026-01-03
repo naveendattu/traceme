@@ -1,12 +1,27 @@
 import { motion } from 'framer-motion';
-import { GraduationCap, Bell } from 'lucide-react';
+import { GraduationCap, Bell, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   alertCount: number;
+  userName?: string;
 }
 
-const Header = ({ alertCount }: HeaderProps) => {
+const Header = ({ alertCount, userName }: HeaderProps) => {
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
+  const initials = userName
+    ? userName.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
+    : 'U';
+
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
@@ -35,8 +50,11 @@ const Header = ({ alertCount }: HeaderProps) => {
             )}
           </Button>
           <div className="h-9 w-9 rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground font-semibold text-sm">
-            JS
+            {initials}
           </div>
+          <Button variant="ghost" size="icon" onClick={handleSignOut}>
+            <LogOut className="h-5 w-5 text-muted-foreground" />
+          </Button>
         </div>
       </div>
     </motion.header>

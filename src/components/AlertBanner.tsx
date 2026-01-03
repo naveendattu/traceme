@@ -1,17 +1,17 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, X } from 'lucide-react';
-import { Subject } from '@/types/attendance';
+import { SubjectWithStats } from '@/hooks/useSubjects';
 import { useState } from 'react';
 
 interface AlertBannerProps {
-  subjects: Subject[];
+  subjects: SubjectWithStats[];
 }
 
 const AlertBanner = ({ subjects }: AlertBannerProps) => {
   const [dismissed, setDismissed] = useState(false);
   
   const atRiskSubjects = subjects.filter(
-    (s) => (s.attendedClasses / s.totalClasses) * 100 < 75
+    (s) => s.totalClasses > 0 && (s.attendedClasses / s.totalClasses) * 100 < 75
   );
   
   if (atRiskSubjects.length === 0 || dismissed) return null;
